@@ -1,6 +1,7 @@
 from random import choice
 from copy import deepcopy
 
+
 class MinMaxAgent:
     def __init__(self, my_token, max_depth=4):
         self.my_token = my_token
@@ -27,7 +28,7 @@ class MinMaxAgent:
             elif board.wins is not None:
                 return -1
             else:
-                return 0
+                return self._score(board)
 
         if maximizing_player:
             max_score = float('-inf')
@@ -45,3 +46,16 @@ class MinMaxAgent:
                 score = self._minimax(new_board, depth - 1, True)
                 min_score = min(min_score, score)
             return min_score
+
+    def _score(self, board):
+        counter = 0
+        if board.board[0][0] != self.my_token and board.board[0][0] != '_':
+            counter += 0.2
+        if board.board[board.height - 1][board.width - 1] != self.my_token and board.board[board.height - 1][board.width - 1] != '_':
+            counter += 0.2
+        if board.board[board.height - 1][0] != self.my_token and board.board[board.height - 1][0] != '_':
+            counter += 0.2
+        if board.board[0][board.width - 1] != self.my_token and board.board[0][board.width - 1] != '_':
+            counter += 0.2
+        #print("------", counter)
+        return counter
