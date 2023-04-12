@@ -1,10 +1,55 @@
 from random import choice
 from copy import deepcopy
 
+from connect4 import Connect4
+
+
+def basic_static_eval(board: Connect4, my_token: str) -> float:
+    op = ""
+    if my_token == 'x':
+        op = 'o'
+    else:
+        op = "x"
+
+    counter = 0
+    op_counter = 0
+    pb = board.iter_fours()
+    for x in pb:
+        if x.count(my_token) == 3 and x.count(op) == 0:
+            counter += 1
+
+    pb = board.iter_fours()
+    for x in pb:
+        if x.count(op) == 3 and x.count(my_token) == 0:
+            op_counter += 1
+
+    pb = board.center_column()
+    for x in pb:
+        counter += x.count(my_token) / 3
+        op_counter += x.count(op) / 3
+
+    first_row = board.board[0]
+
+    op_counter -= first_row.count(op)*0.1
+    counter -= first_row.count(my_token) * 0.1
+
+    pb = board.iter_fours()
+    for x in pb:
+        if x.count(my_token) == 2 and x.count(op) == 0:
+            counter += 0.4
+
+    pb = board.iter_fours()
+    for x in pb:
+        if x.count(op) == 2 and x.count(my_token) == 0:
+            op_counter += 0.4
+        # print("------", counter)
+    return counter - op_counter
+
 
 class MinMaxAgent:
-    def __init__(self, my_token, max_depth=4):
+    def __init__(self, my_token='o', eval_func=basic_static_eval, max_depth=4):
         self.my_token = my_token
+        self.eval_func = eval_func
         self.max_depth = max_depth
 
     def decide(self, board):
@@ -28,7 +73,7 @@ class MinMaxAgent:
             elif board.wins is not None:
                 return -1
             else:
-                return self._score(board)
+                return self.eval_func(board, self.my_token)
 
         if maximizing_player:
             max_score = float('-inf')
@@ -51,11 +96,12 @@ class MinMaxAgent:
         counter = 0
         if board.board[0][0] != self.my_token and board.board[0][0] != '_':
             counter += 0.2
-        if board.board[board.height - 1][board.width - 1] != self.my_token and board.board[board.height - 1][board.width - 1] != '_':
+        if board.board[board.height - 1][board.width - 1] != self.my_token and board.board[board.height - 1][
+            board.width - 1] != '_':
             counter += 0.2
         if board.board[board.height - 1][0] != self.my_token and board.board[board.height - 1][0] != '_':
             counter += 0.2
         if board.board[0][board.width - 1] != self.my_token and board.board[0][board.width - 1] != '_':
             counter += 0.2
-        #print("------", counter)
+        # print("------", counter)
         return counter
